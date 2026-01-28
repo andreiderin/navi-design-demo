@@ -1,3 +1,4 @@
+import React from "react";
 
 export default function NextStep({ title, desc }: { title: string; desc: string }) {
   return (

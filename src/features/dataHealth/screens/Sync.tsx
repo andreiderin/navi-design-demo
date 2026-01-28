@@ -1,3 +1,4 @@
+import React from "react";
 import { Database } from "lucide-react";
 import type { SyncRun } from "../../../types";
 import { cx } from "../../../utils/cx";
@@ -15,10 +16,7 @@ export default function SyncScreen({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-lg font-semibold">Sync & Activity</div>
-          <div className="text-sm text-zinc-600">
-            See exactly what happened and when.
-          </div>
+          <div className="text-lg font-semibold">Sync</div>
         </div>
         <Button onClick={onSync}>
           <Database className="h-4 w-4" />
@@ -28,7 +26,7 @@ export default function SyncScreen({
 
       <div className="rounded-3xl bg-white border border-zinc-200 shadow-sm overflow-hidden">
         <div className="px-5 py-3 border-b border-zinc-100 text-sm font-semibold">
-          Sync history
+          History
         </div>
         <div className="divide-y divide-zinc-100">
           {runs.map((r) => (
@@ -40,7 +38,7 @@ export default function SyncScreen({
                   </div>
                   <div className="text-sm text-zinc-600">
                     {r.status === "SUCCESS" ? "Success" : "Failed"} •{" "}
-                    {r.rowsUpdated} rows • {r.durationSec}s • {r.triggeredBy}
+                    {r.rowsUpdated} rows • {r.durationSec}s
                   </div>
                 </div>
                 <Pill
@@ -57,8 +55,7 @@ export default function SyncScreen({
 
               {r.status === "FAILED" && r.error ? (
                 <div className="mt-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-700">
-                  <div className="font-semibold">Error</div>
-                  <div className="mt-1">{r.error}</div>
+                  {r.error}
                 </div>
               ) : null}
             </div>

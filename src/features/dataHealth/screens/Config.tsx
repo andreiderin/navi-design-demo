@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
-import { Plus, Sparkles, Wrench } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { ChevronRight, Plus, Sparkles, Wrench } from "lucide-react";
 import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";
 import Pill from "../../../components/common/Pill";
 import Toggle from "../../../components/common/Toggle";
 import EmptyState from "../../../components/common/EmptyState";
-import type { LogicalRule, ObjectType } from "../../../types";
+import type { DataContract, LogicalRule, ObjectType } from "../../../types";
 import { cx } from "../../../utils/cx";
 import { severityTone } from "../../../utils/dataHealth.tone";
 import { sevLabel } from "../../../utils/dataHealth.format";
@@ -18,6 +18,7 @@ type FieldConfig = {
   erpName: string;
   dataType: DataType;
   categories: string[];
+  referencedEntity?: ObjectType;
 };
 
 type EntityConfig = {
@@ -30,11 +31,12 @@ const DEFAULT_ENTITY_CONFIGS: EntityConfig[] = [
     entity: "WorkOrder",
     fields: [
       {
-        id: "wo-status",
-        naviDefinition: "Work Order Status",
-        erpName: "status",
+        id: "wo-product",
+        naviDefinition: "Product",
+        erpName: "product_code",
         dataType: "categorical",
-        categories: ["Planned", "In Progress", "Completed", "Cancelled"],
+        categories: [],
+        referencedEntity: "Product",
       },
       {
         id: "wo-qty",
@@ -42,6 +44,13 @@ const DEFAULT_ENTITY_CONFIGS: EntityConfig[] = [
         erpName: "qty",
         dataType: "non-categorical",
         categories: [],
+      },
+      {
+        id: "wo-status",
+        naviDefinition: "Status",
+        erpName: "status",
+        dataType: "categorical",
+        categories: ["Planned", "In Progress", "Completed", "Cancelled"],
       },
     ],
   },
@@ -54,6 +63,13 @@ const DEFAULT_ENTITY_CONFIGS: EntityConfig[] = [
         erpName: "product_type",
         dataType: "categorical",
         categories: ["FG", "WIP", "RM"],
+      },
+      {
+        id: "prod-family",
+        naviDefinition: "Product Family",
+        erpName: "family",
+        dataType: "categorical",
+        categories: ["Standard", "Custom"],
       },
     ],
   },
@@ -74,10 +90,14 @@ const DEFAULT_ENTITY_CONFIGS: EntityConfig[] = [
 ];
 
 export default function ConfigScreen({
+  contract,
+  setContract,
   logicalRules,
   setLogicalRules,
   onTest,
 }: {
+  contract: DataContract;
+  setContract: React.Dispatch<React.SetStateAction<DataContract>>;
   logicalRules: LogicalRule[];
   setLogicalRules: React.Dispatch<React.SetStateAction<LogicalRule[]>>;
   onTest: () => void;
@@ -86,12 +106,12 @@ export default function ConfigScreen({
   const [entities, setEntities] = useState<EntityConfig[]>(
     DEFAULT_ENTITY_CONFIGS
   );
+  const [activeEntity, setActiveEntity] = useState<ObjectType>("WorkOrder");
 
-  const entityMap = useMemo(() => {
-    const map = new Map<ObjectType, EntityConfig>();
-    entities.forEach((e) => map.set(e.entity, e));
-    return map;
-  }, [entities]);
+  const active = useMemo(
+    () => entities.find((e) => e.entity === activeEntity),
+    [entities, activeEntity]
+  );
 
   const updateField = (
     entity: ObjectType,
@@ -208,9 +228,7 @@ export default function ConfigScreen({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="text-lg font-semibold">Configuration</div>
-          <div className="text-sm text-zinc-600">
-            Define data mappings and rules for your factory.
-          </div>
+          <div className="text-sm text-zinc-600">Set mappings and rules.</div>
         </div>
         <Button variant="secondary" onClick={onTest}>
           <Wrench className="h-4 w-4" />
@@ -244,16 +262,48 @@ export default function ConfigScreen({
       </div>
 
       {tab === "mapping" ? (
-        <div className="space-y-6">
-          {(Array.from(entityMap.values()) as EntityConfig[]).map((entity) => (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <aside className="lg:col-span-3">
+            <div className="rounded-3xl bg-white border border-zinc-200 shadow-sm p-3">
+              <div className="px-3 py-2 text-xs font-semibold text-zinc-600">
+                ENTITIES
+              </div>
+              <div className="mt-1 flex flex-col gap-1">
+                {entities.map((e) => {
+                  const active = e.entity === activeEntity;
+                  return (
+                    <button
+                      key={e.entity}
+                      onClick={() => setActiveEntity(e.entity)}
+                      className={cx(
+                        "flex items-center justify-between rounded-2xl px-3 py-2 text-sm transition",
+                        active
+                          ? "bg-zinc-900 text-white"
+                          : "hover:bg-zinc-100 text-zinc-900"
+                      )}
+                    >
+                      <span>{e.entity}</span>
+                      <ChevronRight
+                        className={cx(
+                          "h-4 w-4",
+                          active ? "text-white/80" : "text-zinc-400"
+                        )}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+
+          <div className="lg:col-span-9">
             <Card
-              key={entity.entity}
-              title={`${entity.entity} fields`}
+              title={active ? `${active.entity} fields` : "Fields"}
               icon={Sparkles}
               right={
                 <Button
                   variant="secondary"
-                  onClick={() => addField(entity.entity)}
+                  onClick={() => addField(activeEntity)}
                 >
                   <Plus className="h-4 w-4" />
                   Add field
@@ -262,46 +312,58 @@ export default function ConfigScreen({
             >
               <div className="grid grid-cols-12 gap-3 text-xs text-zinc-500">
                 <div className="col-span-4">Navi definition</div>
-                <div className="col-span-4">ERP name</div>
-                <div className="col-span-2">Data type</div>
+                <div className="col-span-3">ERP name</div>
+                <div className="col-span-3">Data type</div>
                 <div className="col-span-2">Categories</div>
               </div>
 
               <div className="mt-3 space-y-3">
-                {entity.fields.length === 0 ? (
+                {!active || active.fields.length === 0 ? (
                   <div className="text-sm text-zinc-600">
                     No fields configured yet.
                   </div>
                 ) : (
-                  entity.fields.map((field) => (
+                  active.fields.map((field) => (
                     <div
                       key={field.id}
                       className="grid grid-cols-12 gap-3 items-start"
                     >
-                      <input
-                        value={field.naviDefinition}
-                        onChange={(e) =>
-                          updateField(entity.entity, field.id, {
-                            naviDefinition: e.target.value,
-                          })
-                        }
-                        placeholder="Navi definition"
-                        className="col-span-4 rounded-2xl border border-zinc-200 px-3 py-2 text-sm outline-none"
-                      />
+                      <div className="col-span-4 space-y-2">
+                        <input
+                          value={field.naviDefinition}
+                          onChange={(e) =>
+                            updateField(activeEntity, field.id, {
+                              naviDefinition: e.target.value,
+                            })
+                          }
+                          placeholder="Navi definition"
+                          className="w-full rounded-2xl border border-zinc-200 px-3 py-2 text-sm outline-none"
+                        />
+                        {field.referencedEntity ? (
+                          <button
+                            onClick={() => setActiveEntity(field.referencedEntity!)}
+                            className="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-zinc-900"
+                          >
+                            <span className="font-medium">Entity:</span>
+                            <span>{field.referencedEntity}</span>
+                            <ChevronRight className="h-3 w-3" />
+                          </button>
+                        ) : null}
+                      </div>
                       <input
                         value={field.erpName}
                         onChange={(e) =>
-                          updateField(entity.entity, field.id, {
+                          updateField(activeEntity, field.id, {
                             erpName: e.target.value,
                           })
                         }
                         placeholder="ERP name"
-                        className="col-span-4 rounded-2xl border border-zinc-200 px-3 py-2 text-sm outline-none"
+                        className="col-span-3 rounded-2xl border border-zinc-200 px-3 py-2 text-sm outline-none"
                       />
                       <select
                         value={field.dataType}
                         onChange={(e) =>
-                          updateField(entity.entity, field.id, {
+                          updateField(activeEntity, field.id, {
                             dataType: e.target.value as DataType,
                             categories:
                               e.target.value === "categorical"
@@ -309,7 +371,7 @@ export default function ConfigScreen({
                                 : [],
                           })
                         }
-                        className="col-span-2 rounded-2xl border border-zinc-200 px-3 py-2 text-sm outline-none"
+                        className="col-span-3 rounded-2xl border border-zinc-200 px-3 py-2 text-sm outline-none"
                       >
                         <option value="categorical">Categorical</option>
                         <option value="non-categorical">Non-categorical</option>
@@ -319,9 +381,9 @@ export default function ConfigScreen({
                         {field.dataType === "categorical" ? (
                           <CategoryEditor
                             values={field.categories}
-                            onAdd={(v) => addCategory(entity.entity, field.id, v)}
+                            onAdd={(v) => addCategory(activeEntity, field.id, v)}
                             onRemove={(v) =>
-                              removeCategory(entity.entity, field.id, v)
+                              removeCategory(activeEntity, field.id, v)
                             }
                           />
                         ) : (
@@ -333,7 +395,7 @@ export default function ConfigScreen({
                 )}
               </div>
             </Card>
-          ))}
+          </div>
         </div>
       ) : (
         <div className="space-y-6">
@@ -347,10 +409,7 @@ export default function ConfigScreen({
               </Button>
             }
           >
-            <div className="text-sm text-zinc-600">
-              Logical rules capture factory-specific workflows (barcode events
-              vs statuses, mandatory steps, route membership, etc).
-            </div>
+            <div className="text-sm text-zinc-600">Factory-specific logic.</div>
           </Card>
 
           <div className="grid grid-cols-1 gap-4">

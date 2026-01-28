@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
@@ -6,10 +6,9 @@ import {
   ChevronRight,
   Database,
   Filter,
-  RefreshCcw,
   Search,
 } from "lucide-react";
-import type { Issue, IssueStatus, IssueType, Severity } from "../../../types";
+import type { Issue, IssueStatus, Severity } from "../../../types";
 import { cx } from "../../../utils/cx";
 import { severityTone, statusTone } from "../../../utils/dataHealth.tone";
 import { sevLabel, typeLabel } from "../../../utils/dataHealth.format";
@@ -19,14 +18,11 @@ import EmptyState from "../../../components/common/EmptyState";
 import Input from "../../../components/common/Input";
 import Pill from "../../../components/common/Pill";
 import Select from "../../../components/common/Select";
-import Toggle from "../../../components/common/Toggle";
 
 export type IssuesFilterState = {
   q: string;
   severity: "ALL" | Severity;
-  type: "ALL" | IssueType;
   status: "ALL" | IssueStatus;
-  newOnly: boolean;
 };
 
 export default function IssuesScreen({
@@ -45,9 +41,7 @@ export default function IssuesScreen({
   const [filters, setFilters] = useState<IssuesFilterState>({
     q: "",
     severity: "ALL",
-    type: "ALL",
     status: "ALL",
-    newOnly: false,
   });
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
@@ -56,9 +50,7 @@ export default function IssuesScreen({
     return issues.filter((i) => {
       if (filters.severity !== "ALL" && i.severity !== filters.severity)
         return false;
-      if (filters.type !== "ALL" && i.type !== filters.type) return false;
       if (filters.status !== "ALL" && i.status !== filters.status) return false;
-      if (filters.newOnly && !i.isNewSinceLastSync) return false;
       if (!q) return true;
       const hay =
         `${i.id} ${i.objectType} ${i.objectKey} ${i.ruleName} ${i.message}`.toLowerCase();
@@ -73,7 +65,6 @@ export default function IssuesScreen({
 
   const allVisibleSelected =
     filtered.length > 0 && filtered.every((i) => selectedIds[i.id]);
-  const someVisibleSelected = filtered.some((i) => selectedIds[i.id]);
 
   const toggleAllVisible = () => {
     if (allVisibleSelected) {
@@ -92,39 +83,21 @@ export default function IssuesScreen({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="text-lg font-semibold">Issues</div>
-          <div className="text-sm text-zinc-600">
-            Find what’s broken, verify fixes, and manage noise.
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="secondary" onClick={onRefresh}>
-            <RefreshCcw className="h-4 w-4" />
-            Refresh checks
-          </Button>
-          <Button onClick={onSync}>
-            <Database className="h-4 w-4" />
-            Sync now
+            Refresh
           </Button>
         </div>
       </div>
 
-      <Card
-        title="Filters"
-        icon={Filter}
-        right={
-          <Toggle
-            checked={filters.newOnly}
-            onChange={(v) => setFilters((p) => ({ ...p, newOnly: v }))}
-            label="New since last sync"
-          />
-        }
-      >
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
+      <Card title="Filters" icon={Filter}>
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           <Input
             value={filters.q}
             onChange={(v) => setFilters((p) => ({ ...p, q: v }))}
-            placeholder="Search by WO, rule, message…"
+            placeholder="Search…"
             icon={Search}
           />
           <Select
@@ -132,21 +105,10 @@ export default function IssuesScreen({
             value={filters.severity}
             onChange={(v) => setFilters((p) => ({ ...p, severity: v as any }))}
             options={[
-              { value: "ALL", label: "All severities" },
+              { value: "ALL", label: "All" },
               { value: "BLOCKER", label: "Blocker" },
               { value: "MAJOR", label: "Major" },
               { value: "MINOR", label: "Minor" },
-            ]}
-          />
-          <Select
-            label="Type"
-            value={filters.type}
-            onChange={(v) => setFilters((p) => ({ ...p, type: v as any }))}
-            options={[
-              { value: "ALL", label: "All types" },
-              { value: "NULL", label: "Null" },
-              { value: "DEPENDENCY", label: "Dependency" },
-              { value: "LOGICAL", label: "Logical" },
             ]}
           />
           <Select
@@ -154,7 +116,7 @@ export default function IssuesScreen({
             value={filters.status}
             onChange={(v) => setFilters((p) => ({ ...p, status: v as any }))}
             options={[
-              { value: "ALL", label: "All statuses" },
+              { value: "ALL", label: "All" },
               { value: "OPEN", label: "Open" },
               { value: "ACKNOWLEDGED", label: "Acknowledged" },
               { value: "SUPPRESSED", label: "Suppressed" },
@@ -186,15 +148,9 @@ export default function IssuesScreen({
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => onBulk(selection, "suppress")}
-                >
-                  Suppress
-                </Button>
-                <Button
-                  variant="secondary"
                   onClick={() => onBulk(selection, "resolve")}
                 >
-                  Mark resolved
+                  Resolve
                 </Button>
                 <Button variant="ghost" onClick={() => setSelectedIds({})}>
                   Clear
@@ -208,20 +164,8 @@ export default function IssuesScreen({
       {filtered.length === 0 ? (
         <EmptyState
           icon={AlertCircle}
-          title="No issues match your filters."
-          subtitle="Try adjusting filters or syncing from ERP."
-          action={
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={onRefresh}>
-                <RefreshCcw className="h-4 w-4" />
-                Refresh checks
-              </Button>
-              <Button onClick={onSync}>
-                <Database className="h-4 w-4" />
-                Sync now
-              </Button>
-            </div>
-          }
+          title="No issues"
+          subtitle="Try a different filter."
         />
       ) : (
         <div className="rounded-3xl bg-white border border-zinc-200 shadow-sm overflow-hidden">
@@ -245,7 +189,7 @@ export default function IssuesScreen({
                   <CheckCircle2 className="h-3 w-3 text-white" />
                 ) : null}
               </span>
-              {allVisibleSelected ? "Unselect visible" : "Select visible"}
+              {allVisibleSelected ? "Unselect" : "Select"}
             </button>
           </div>
 
@@ -290,9 +234,6 @@ export default function IssuesScreen({
                         <Pill className={cx(statusTone(i.status))}>
                           {i.status}
                         </Pill>
-                        {i.isNewSinceLastSync ? (
-                          <Pill className="bg-black text-white">New</Pill>
-                        ) : null}
                       </div>
 
                       <div className="mt-2 flex items-center justify-between gap-3">
@@ -308,10 +249,7 @@ export default function IssuesScreen({
                       </div>
 
                       <div className="mt-2 text-xs text-zinc-500">
-                        Rule:{" "}
-                        <span className="text-zinc-700">{i.ruleName}</span> •
-                        Last seen{" "}
-                        <span className="text-zinc-700">{i.lastSeenAt}</span>
+                        Last seen {i.lastSeenAt}
                       </div>
                     </div>
                   </div>
@@ -319,13 +257,6 @@ export default function IssuesScreen({
               );
             })}
           </div>
-
-          {someVisibleSelected && !allVisibleSelected ? (
-            <div className="px-5 py-3 border-t border-zinc-100 text-xs text-zinc-600 bg-zinc-50">
-              Tip: Use “Select visible” to apply bulk actions to the current
-              filter view.
-            </div>
-          ) : null}
         </div>
       )}
     </div>

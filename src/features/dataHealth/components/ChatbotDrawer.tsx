@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, MessageCircle, Send } from "lucide-react";
 import Button from "../../../components/common/Button";
@@ -6,12 +6,15 @@ import Button from "../../../components/common/Button";
 export default function ChatbotDrawer({
   open,
   onClose,
+  width,
+  onWidthChange,
 }: {
   open: boolean;
   onClose: () => void;
+  width: number;
+  onWidthChange: (w: number) => void;
 }) {
   const [input, setInput] = useState("");
-  const [width, setWidth] = useState(420);
 
   return (
     <AnimatePresence>
@@ -32,7 +35,7 @@ export default function ChatbotDrawer({
               const startW = width;
               const onMove = (ev: MouseEvent) => {
                 const delta = startX - ev.clientX;
-                setWidth(startW + delta);
+                onWidthChange(startW + delta);
               };
               const onUp = () => {
                 window.removeEventListener("mousemove", onMove);

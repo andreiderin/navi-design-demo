@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, CheckCircle2, MessageCircle } from "lucide-react";
 
-import Header from "./components/Header";
 import ChatbotDrawer from "./components/ChatbotDrawer";
 import IssueDrawer from "./components/IssueDrawer";
 
@@ -13,6 +12,7 @@ import Overview from "./screens/Overview";
 import Sync from "./screens/Sync";
 
 import type {
+  DataContract,
   Issue,
   IssueStatus,
   LogicalRule,
@@ -21,6 +21,7 @@ import type {
 } from "../../types";
 
 import {
+  DEFAULT_CONTRACT,
   DEFAULT_LOGICAL_RULES,
   MOCK_DIFF,
   MOCK_ISSUES,
@@ -37,6 +38,7 @@ export function DataHealthPage({
 }) {
   // Data
   const [issues, setIssues] = useState<Issue[]>(MOCK_ISSUES);
+  const [contract, setContract] = useState<DataContract>(DEFAULT_CONTRACT);
   const [logicalRules, setLogicalRules] = useState<LogicalRule[]>(
     DEFAULT_LOGICAL_RULES
   );
@@ -45,6 +47,7 @@ export function DataHealthPage({
   // UI
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatWidth, setChatWidth] = useState(420);
   const selectedIssue = useMemo(
     () => issues.find((i) => i.id === selectedIssueId) ?? null,
     [issues, selectedIssueId]
@@ -107,9 +110,12 @@ export function DataHealthPage({
 
   return (
     <>
-      <Header readiness={readiness} onRefresh={refreshChecks} onSync={syncNow} />
-
-      <div className="mt-6">
+      <div
+        className="mt-6 transition-[padding-right] duration-200"
+        style={{
+          paddingRight: chatOpen ? Math.max(320, Math.min(640, chatWidth)) : 0,
+        }}
+      >
         <AnimatePresence mode="wait">
           {nav === "overview" && (
             <motion.div
@@ -124,7 +130,6 @@ export function DataHealthPage({
                 counts={counts}
                 lastSync={syncRuns[0]}
                 onGoIssues={() => setNav("issues")}
-                onRefresh={refreshChecks}
                 onSync={syncNow}
               />
             </motion.div>
@@ -164,6 +169,8 @@ export function DataHealthPage({
               transition={{ duration: 0.2 }}
             >
               <Config
+                contract={contract}
+                setContract={setContract}
                 logicalRules={logicalRules}
                 setLogicalRules={setLogicalRules}
                 onTest={() =>
@@ -213,7 +220,12 @@ export function DataHealthPage({
         }
         onSyncNow={syncNow}
       />
-      <ChatbotDrawer open={chatOpen} onClose={() => setChatOpen(false)} />
+      <ChatbotDrawer
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        width={chatWidth}
+        onWidthChange={setChatWidth}
+      />
       {!chatOpen ? (
         <button
           onClick={() => setChatOpen(true)}

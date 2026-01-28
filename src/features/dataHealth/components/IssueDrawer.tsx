@@ -1,3 +1,4 @@
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Database, X } from "lucide-react";
 import type { Issue } from "../../../types";

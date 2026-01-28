@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Database, Wrench } from "lucide-react";
 import Card from "../../../components/common/Card";
 import Pill from "../../../components/common/Pill";
@@ -43,11 +43,8 @@ export default function DiffsScreen({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="text-lg font-semibold">Snapshots & Diffs</div>
-          <div className="text-sm text-zinc-600">
-            Compare plan-run inputs with current reality.
-          </div>
         </div>
-        <div className="min-w-[280px]">
+        <div className="min-w-[240px]">
           <Select
             label="Plan run"
             value={selectedPlan}
@@ -69,28 +66,19 @@ export default function DiffsScreen({
                 : "bg-zinc-900/5 border-zinc-200 text-zinc-900"
             )}
           >
-            {replanRecommendation.yes
-              ? "Re-plan recommended"
-              : "Plan still valid"}
+            {replanRecommendation.yes ? "Re-plan" : "No re-plan"}
           </Pill>
         }
       >
-        {replanRecommendation.yes ? (
-          <div className="text-sm text-zinc-700">
-            Reasons:{" "}
-            <span className="font-medium text-zinc-900">
-              {replanRecommendation.reasons.join(", ")}
-            </span>
-          </div>
-        ) : (
-          <div className="text-sm text-zinc-700">
-            No planning-critical differences detected (heuristic).
-          </div>
-        )}
+        <div className="text-sm text-zinc-700">
+          {replanRecommendation.yes
+            ? `Reasons: ${replanRecommendation.reasons.join(", ")}`
+            : "No critical changes detected."}
+        </div>
       </Card>
 
       {diff.map((d) => (
-        <Card key={d.objectType} title={`${d.objectType} changes`} icon={Database}>
+        <Card key={d.objectType} title={d.objectType} icon={Database}>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <DiffBox title="Added" items={d.added} />
             <DiffBox title="Removed" items={d.removed} />

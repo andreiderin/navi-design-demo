@@ -4,7 +4,6 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
-  Database,
   Filter,
   Search,
 } from "lucide-react";
@@ -29,13 +28,11 @@ export default function IssuesScreen({
   issues,
   onSelectIssue,
   onRefresh,
-  onSync,
   onBulk,
 }: {
   issues: Issue[];
   onSelectIssue: (id: string) => void;
   onRefresh: () => void;
-  onSync: () => void;
   onBulk: (ids: string[], action: "ack" | "suppress" | "resolve") => void;
 }) {
   const [filters, setFilters] = useState<IssuesFilterState>({

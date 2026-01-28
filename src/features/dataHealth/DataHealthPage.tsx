@@ -12,7 +12,6 @@ import Overview from "./screens/Overview";
 import Sync from "./screens/Sync";
 
 import type {
-  DataContract,
   Issue,
   IssueStatus,
   LogicalRule,
@@ -21,7 +20,6 @@ import type {
 } from "../../types";
 
 import {
-  DEFAULT_CONTRACT,
   DEFAULT_LOGICAL_RULES,
   MOCK_DIFF,
   MOCK_ISSUES,
@@ -38,7 +36,6 @@ export function DataHealthPage({
 }) {
   // Data
   const [issues, setIssues] = useState<Issue[]>(MOCK_ISSUES);
-  const [contract, setContract] = useState<DataContract>(DEFAULT_CONTRACT);
   const [logicalRules, setLogicalRules] = useState<LogicalRule[]>(
     DEFAULT_LOGICAL_RULES
   );
@@ -147,7 +144,6 @@ export function DataHealthPage({
                 issues={issues}
                 onSelectIssue={(id) => setSelectedIssueId(id)}
                 onRefresh={refreshChecks}
-                onSync={syncNow}
                 onBulk={(ids, action) => {
                   if (action === "ack")
                     ids.forEach((id) => updateIssueStatus(id, "ACKNOWLEDGED"));
@@ -169,8 +165,6 @@ export function DataHealthPage({
               transition={{ duration: 0.2 }}
             >
               <Config
-                contract={contract}
-                setContract={setContract}
                 logicalRules={logicalRules}
                 setLogicalRules={setLogicalRules}
                 onTest={() =>

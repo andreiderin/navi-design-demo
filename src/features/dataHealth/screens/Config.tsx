@@ -5,7 +5,7 @@ import Card from "../../../components/common/Card";
 import Pill from "../../../components/common/Pill";
 import Toggle from "../../../components/common/Toggle";
 import EmptyState from "../../../components/common/EmptyState";
-import type { DataContract, LogicalRule, ObjectType } from "../../../types";
+import type { LogicalRule, ObjectType } from "../../../types";
 import { cx } from "../../../utils/cx";
 import { severityTone } from "../../../utils/dataHealth.tone";
 import { sevLabel } from "../../../utils/dataHealth.format";
@@ -74,14 +74,10 @@ const DEFAULT_ENTITY_CONFIGS: EntityConfig[] = [
 ];
 
 export default function ConfigScreen({
-  contract,
-  setContract,
   logicalRules,
   setLogicalRules,
   onTest,
 }: {
-  contract: DataContract;
-  setContract: React.Dispatch<React.SetStateAction<DataContract>>;
   logicalRules: LogicalRule[];
   setLogicalRules: React.Dispatch<React.SetStateAction<LogicalRule[]>>;
   onTest: () => void;

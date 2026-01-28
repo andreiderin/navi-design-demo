@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function StatMini({ label, value }: { label: string; value: number }) {
   return (

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronRight, Plus, Sparkles, Wrench } from "lucide-react";
 import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";

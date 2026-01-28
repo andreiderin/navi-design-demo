@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight, Database, X } from "lucide-react";
 import { DataHealthPage } from "./features/dataHealth";
 import type { NavKey } from "./types";
@@ -23,11 +23,6 @@ export default function App() {
     { id: "dataHealth:overview", section: "dataHealth", nav: "overview", label: "Overview" },
   ]);
   const [activeTabId, setActiveTabId] = useState<string>("dataHealth:overview");
-
-  const activeTab = useMemo(
-    () => tabs.find((t) => t.id === activeTabId) ?? tabs[0],
-    [activeTabId, tabs]
-  );
 
   const openDataHealthTab = (nav: NavKey, label: string) => {
     const id = `dataHealth:${nav}`;

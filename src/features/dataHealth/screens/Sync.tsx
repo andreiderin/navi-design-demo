@@ -1,4 +1,3 @@
-import React from "react";
 import { Database } from "lucide-react";
 import type { SyncRun } from "../../../types";
 import { cx } from "../../../utils/cx";

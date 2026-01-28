@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ChevronRight, Database } from "lucide-react";
 import { DataHealthPage } from "./features/dataHealth";
 import type { NavKey } from "./types";

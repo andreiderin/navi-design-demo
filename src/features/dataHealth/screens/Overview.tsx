@@ -1,4 +1,3 @@
-import React from "react";
 import { AlertCircle, Clock, Database, RefreshCcw, Sparkles, Wrench } from "lucide-react";
 import Card from "../../../components/common/Card";
 import Pill from "../../../components/common/Pill";

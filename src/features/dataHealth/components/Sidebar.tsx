@@ -1,4 +1,3 @@
-import React from "react";
 import { AlertCircle, Clock, Settings, SlidersHorizontal, Wrench } from "lucide-react";
 import type { NavKey } from "../../../types";
 import { cx } from "../../../utils/cx";

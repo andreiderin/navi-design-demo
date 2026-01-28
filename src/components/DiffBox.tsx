@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function DiffBox({ title, items }: { title: string; items: string[] }) {
   return (

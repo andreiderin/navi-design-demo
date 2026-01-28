@@ -1,4 +1,3 @@
-import React from "react";
 import { Database, RefreshCcw, Sparkles } from "lucide-react";
 import Button from "../../../components/common/Button";
 import Pill from "../../../components/common/Pill";

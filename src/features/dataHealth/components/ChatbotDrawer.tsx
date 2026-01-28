@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, MessageCircle, Send } from "lucide-react";
 import Button from "../../../components/common/Button";
